@@ -1,0 +1,41 @@
+Description: Sets up the underlying infrastructure for hosting a simple SPA
+Parameters:
+  BucketName:
+    Description: name for the S3 bucket hosting the SPA
+    Type: String
+Resources:
+  SPAS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: { 'Ref': 'BucketName' }
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+        RoutingRules:
+          - RoutingRuleCondition:
+              HttpErrorCodeReturnedEquals: '404'
+              KeyPrefixEquals: out1/
+            RedirectRule:
+              HostName: ec2-11-22-333-44.compute-1.amazonaws.com
+              ReplaceKeyPrefixWith: report-404/
+
+  DocBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket:
+        Ref: 'SPAS3Bucket'
+      PolicyDocument:
+        {
+          'Version': '2012-10-17',
+          'Statement':
+            [
+              {
+                'Sid': 'PublicReadGetObject',
+                'Effect': 'Allow',
+                'Principal': '*',
+                'Action': 's3:GetObject',
+                'Resource':
+                  !Join ['', ['arn:aws:s3:::', { 'Ref': 'BucketName' }, '/*']],
+              },
+            ],
+        }

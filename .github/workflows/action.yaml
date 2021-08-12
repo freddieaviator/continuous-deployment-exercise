@@ -1,0 +1,38 @@
+name: GitHub Actions Pytests
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node: [3.6,3.8]
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup
+        uses: actions/setup-python@v2
+        with:
+          # The Node.js version to configure
+          python-version: ${{ matrix.node }}
+
+      - name: black-check@master
+        uses: RojerGS/python-black-check@master
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      
+      - name: Lint with black
+        run: |
+          pip install black
+      
+      - name: Running pytests
+        run: |
+          pytest demo_pytest/test_my_awesome_module.py
