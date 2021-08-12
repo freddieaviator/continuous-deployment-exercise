@@ -36,3 +36,6 @@ jobs:
 
       - name: build-ng
         run: ng build
+
+      - name: sync-data
+        run: aws s3 sync dist/angular-d3/ s3://freddiebucket-001
